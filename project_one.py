@@ -61,22 +61,76 @@ def generate_board(size):
     white_cell = ["+-+","|\u25CB|","+-+"]
     black_cell = ["+-+","|\u25CF|","+-+"]"""
 
+#This function uses the boards list values to print out the 
+# current state of the baord to the terminal/screen
 def get_board_as_string(board):
     size = len(board[0])
     board_as_string = ""
-    """print(size)
+    border_string = " "
+    print(end="  ")
+    for i in range(0,size, 1): #creates the top numbering
+        if i > 9:
+            print(i%10, end=" ")
+        else:
+            print(i, end=" ")
+    print()
     for i in range(size): #creates the top/bottom border of the cells
-        board_as_string += "+-"
+        border_string += "+-"
         if i == size-1:
-            board_as_string += "+"""
-    for i in range(size):
+            border_string += "+"
+    for j in range(size): #creates the colored cells/blanks/pipes
+        for i in range(size):
+            board_as_string += "|"
+            if board[j][i] == 0:
+                board_as_string += " "
+            elif board[j][i] == 1:
+                board_as_string += "\u25CF"
+            elif board[j][i] == 2:
+                board_as_string += "\u25CB"
         board_as_string += "|"
-        ...
-
+        print(border_string)
+        if j > 9:
+            print(j%10, end="") #creates the side numbering
+        else:
+            print(j, end="")
+        print(board_as_string)
+        board_as_string = ""
+    print(border_string)
     return board_as_string
+#This function allows the board to be prepped for play by removing two 
+#pieces if the moves are deemed valid
+def prep_board_human(board):
+    get_board_as_string(board)
+    size = len(board[0])
+    print("enter the two rows and two colums you wish to remove(R1 C1 R2 C2)")
+    get_input = True
+    while get_input == True:
+        row1_to_remove = int(input())
+        col1_to_remove = int(input())
+        row2_to_remove = int(input())
+        col2_to_remove = int(input())
+        if board[row1_to_remove][col1_to_remove] == board[row2_to_remove][col2_to_remove]:
+            #print(board[row1_to_remove][col1_to_remove])
+            #print(board[row2_to_remove][col2_to_remove])
+            print("Invalid input, need different colors.")
+        elif row1_to_remove ==  0 or row2_to_remove == 0:
+            print("Invalid input, need a different row.")
+        elif row1_to_remove == size or row2_to_remove == size: #tests all cases to make sure its a valid move
+            print("Invalid input, need a different row.")
+        elif col1_to_remove == 0 or col2_to_remove == 0:
+            print("Invalid input, need a different column.")
+        elif col1_to_remove == size or col2_to_remove == size:
+            print("Invalid input, need a different column.")
+        else:
+            board[row1_to_remove][col1_to_remove] = 0 #removes elements
+            board[row2_to_remove][col2_to_remove] = 0
+            return
 
-board_test = generate_board(5)
-print(get_board_as_string(board_test))
+
+board_test = generate_board(8)
+prep_board_human(board_test)
+get_board_as_string(board_test)
+
             
 
     
