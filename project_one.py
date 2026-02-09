@@ -126,6 +126,10 @@ def prep_board_human(board):
             board[row2_to_remove][col2_to_remove] = 0
             return
 
+move_test = ((3,3),(3,4))
+
+def is_valid_move(board, move): #move is a nested tuple ((start),(end))
+    
 
 board_test = generate_board(8)
 prep_board_human(board_test)
