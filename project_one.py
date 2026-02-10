@@ -97,6 +97,7 @@ def get_board_as_string(board):
         board_as_string = ""
     print(border_string)
     return board_as_string
+
 #This function allows the board to be prepped for play by removing two 
 #pieces if the moves are deemed valid
 def prep_board_human(board):
@@ -110,8 +111,6 @@ def prep_board_human(board):
         row2_to_remove = int(input())
         col2_to_remove = int(input())
         if board[row1_to_remove][col1_to_remove] == board[row2_to_remove][col2_to_remove]:
-            #print(board[row1_to_remove][col1_to_remove])
-            #print(board[row2_to_remove][col2_to_remove])
             print("Invalid input, need different colors.")
         elif row1_to_remove ==  0 or row2_to_remove == 0:
             print("Invalid input, need a different row.")
@@ -126,15 +125,52 @@ def prep_board_human(board):
             board[row2_to_remove][col2_to_remove] = 0
             return
 
-move_test = ((3,3),(3,4))
+
+"""
+Mandatory Capture: A player must make a capture if one is available;
+ if no jumps are possible, the player loses.
+
+Orthogonal Jumps: Pieces can only jump over opponents horizontally 
+or vertically, never diagonally.
+
+Landing Spot: The piece must land in an immediately adjacent empty 
+space directly behind the opponent's piece.
+
+Directionality: A single turn can consist of one or more jumps using
+ the same piece, but all jumps must continue in the same straight line.
+ 
+"""
 
 def is_valid_move(board, move): #move is a nested tuple ((start),(end))
+    move_list = (move[0][0], move[0][1], move[1][0], move[1][1]) #inputs the moves into a new tuple to ease access
+    move_total = 0
+    vertial_move = False
+    horizontal_move = False
+    for moves in move_list: #Checks to make sure the pieces are being moved
+        move_total += moves
+    if move_total != 0:
+        return False
+    if (start_row + end_row) % 2 != 0 or (start_col + end_col) % 2 != 0: #checks to make sure that the move was a jump
+        return False
     
+    #if get_valid_moves_for_stone(board).size() == 0: #NEED TO MAKE FUNCTION FOR THIS TO WORK
+       # return False 
+    
+    if move_list[1] == move_list[3]: #determining which kind of move is made after other checks are complete
+        vertial_move = True
+    else:
+        horizontal_move == True
+    
+
+
+
+def get_valid_moves_for_stone(board, stone):
+
 
 board_test = generate_board(8)
 prep_board_human(board_test)
 get_board_as_string(board_test)
-
+move_test = ((3,3),(3,4))
             
 
     
