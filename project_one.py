@@ -62,7 +62,7 @@ def generate_board(size):
     black_cell = ["+-+","|\u25CF|","+-+"]"""
 
 #This function uses the boards list values to print out the 
-# current state of the baord to the terminal/screen
+# current state of the board to the terminal/screen
 def get_board_as_string(board):
     size = len(board[0])
     board_as_string = ""
@@ -113,9 +113,9 @@ def prep_board_human(board):
         if board[row1_to_remove][col1_to_remove] == board[row2_to_remove][col2_to_remove]:
             print("Invalid input, need different colors.")
         elif row1_to_remove ==  0 or row2_to_remove == 0:
-            print("Invalid input, need a different row.")
+            print("Invalid input, need a different row1.")
         elif row1_to_remove == size or row2_to_remove == size: #tests all cases to make sure its a valid move
-            print("Invalid input, need a different row.")
+            print("Invalid input, need a different row1.")
         elif col1_to_remove == 0 or col2_to_remove == 0:
             print("Invalid input, need a different column.")
         elif col1_to_remove == size or col2_to_remove == size:
@@ -142,35 +142,57 @@ Directionality: A single turn can consist of one or more jumps using
 """
 
 def is_valid_move(board, move): #move is a nested tuple ((start),(end))
-    move_list = (move[0][0], move[0][1], move[1][0], move[1][1]) #inputs the moves into a new tuple to ease access
-    move_total = 0
+    if (move[0][0] + move[1][0]) % 2 != 0 or (move[0][1] + move[1][1]) % 2 != 0: #checks to make sure that the move was a jump
+        return False
+    '''if get_valid_moves_for_stone(board,stone_test).size() < 2:
+        print(get_valid_moves_for_stone(board,stone_test).size()) #NEED TO MAKE FUNCTION FOR THIS TO WORK
+        return False '''
+    return True
+
+
+#This function checks for possible moves a stone can make once the board is human ready
+def get_valid_moves_for_stone(board, stone):
+    row1, col1 = stone[0] 
+    row2, col2 = stone[1]  #creates a copy of the stone's position with accesible data type
+    move_list = [tuple([row1,col1])] 
+    temp_list = []
     vertial_move = False
     horizontal_move = False
-    for moves in move_list: #Checks to make sure the pieces are being moved
-        move_total += moves
-    if move_total != 0:
-        return False
-    if (start_row + end_row) % 2 != 0 or (start_col + end_col) % 2 != 0: #checks to make sure that the move was a jump
-        return False
-    
-    #if get_valid_moves_for_stone(board).size() == 0: #NEED TO MAKE FUNCTION FOR THIS TO WORK
-       # return False 
-    
-    if move_list[1] == move_list[3]: #determining which kind of move is made after other checks are complete
+    print(row1, row2)
+    if row1 == row2: #determining which kind of move is made after other checks are complete
         vertial_move = True
+        print("VERTIAL")
     else:
         horizontal_move == True
-    
-
-
-
-def get_valid_moves_for_stone(board, stone):
-
+        print("HORIZONTAL")
+    if board[row1-2][col1] == 0 and board[row1-1][col1] != 0: #checks all 4 directions stone can move per turn
+        temp_list += (row1-2, col1)
+        move_list.append(tuple(temp_list))
+        temp_list = []
+    if board[row1+2][col1] == 0 and board[row1+1][col1] != 0:
+        temp_list += (row1+2, col1)
+        move_list.append(tuple(temp_list))
+        temp_list = []
+    if board[row1][col1-2] == 0 and board[row1][col1-1] != 0:
+        temp_list += (row1, col1-2)
+        move_list.append(tuple(temp_list))
+        temp_list = []
+    if board[row1][col1+2] == 0 and board[row1][col1+1] != 0:
+        temp_list += (row1, col1+2)
+        move_list.append(tuple(row1, col1+2))
+        temp_list = []
+    return tuple(move_list) #adds all moves to a tuple and returns it
 
 board_test = generate_board(8)
 prep_board_human(board_test)
 get_board_as_string(board_test)
-move_test = ((3,3),(3,4))
-            
+stone_test = [[3,6], [3,4]]
+
+#print(get_valid_moves_for_stone(board_test, stone_test))
+
+if is_valid_move(board_test, stone_test):
+    print("TRUE")
+else:
+    print("FALSE")
 
     
