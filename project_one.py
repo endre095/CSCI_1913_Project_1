@@ -142,57 +142,59 @@ Directionality: A single turn can consist of one or more jumps using
 """
 
 def is_valid_move(board, move): #move is a nested tuple ((start),(end))
+    color = board[move[0][0]][move[0][1]]
+    size = len(board)
+    if move[0][0] != move[1][0] and move[0][1] != move[1][1]:
+        return False
+    if color == 0:
+        return False
+    if move[0][0] <= 0 or move[1][0] <= 0 or move[0][1] > size or move[1][1] > size:
+        return False
     if (move[0][0] + move[1][0]) % 2 != 0 or (move[0][1] + move[1][1]) % 2 != 0: #checks to make sure that the move was a jump
         return False
-    '''if get_valid_moves_for_stone(board,stone_test).size() < 2:
-        print(get_valid_moves_for_stone(board,stone_test).size()) #NEED TO MAKE FUNCTION FOR THIS TO WORK
-        return False '''
+    if len(move) > 2: #makes sure the input into the function was valid
+        return False
+    if board[move[1][0]][move[1][1]] != 0: #checks to make sure move-to tile is empty
+        return False
     return True
 
 
 #This function checks for possible moves a stone can make once the board is human ready
 def get_valid_moves_for_stone(board, stone):
-    row1, col1 = stone[0] 
-    row2, col2 = stone[1]  #creates a copy of the stone's position with accesible data type
-    move_list = [tuple([row1,col1])] 
-    temp_list = []
-    vertial_move = False
-    horizontal_move = False
-    print(row1, row2)
-    if row1 == row2: #determining which kind of move is made after other checks are complete
-        vertial_move = True
-        print("VERTIAL")
-    else:
-        horizontal_move == True
-        print("HORIZONTAL")
-    if board[row1-2][col1] == 0 and board[row1-1][col1] != 0: #checks all 4 directions stone can move per turn
-        temp_list += (row1-2, col1)
-        move_list.append(tuple(temp_list))
-        temp_list = []
-    if board[row1+2][col1] == 0 and board[row1+1][col1] != 0:
-        temp_list += (row1+2, col1)
-        move_list.append(tuple(temp_list))
-        temp_list = []
-    if board[row1][col1-2] == 0 and board[row1][col1-1] != 0:
-        temp_list += (row1, col1-2)
-        move_list.append(tuple(temp_list))
-        temp_list = []
-    if board[row1][col1+2] == 0 and board[row1][col1+1] != 0:
-        temp_list += (row1, col1+2)
-        move_list.append(tuple(row1, col1+2))
-        temp_list = []
+    row1, col1 = stone       #creates a copy of the stone's position with accesible data type
+    #print(row1, col1)
+    stone_number = board[row1][col1] 
+    opponent = 2 if stone_number == 1 else 1 #determines which color stone should be checked against for moves
+    move_list = [] 
+    size = len(board)
+    move_list = []
+    if row1 - 2 >= 0:
+        if board[row1-2][col1] == 0 and board[row1-1][col1] == opponent:
+            move_list.append((row1-2, col1))
+    if row1 + 2 < size:
+        if board[row1+2][col1] == 0 and board[row1+1][col1] == opponent:
+            move_list.append((row1+2, col1))
+    if col1 - 2 >= 0:
+        if board[row1][col1-2] == 0 and board[row1][col1-1] == opponent:
+            move_list.append((row1, col1-2))
+    if col1 + 2 < size:
+        if board[row1][col1+2] == 0 and board[row1][col1+1] == opponent:
+            move_list.append((row1, col1+2))
     return tuple(move_list) #adds all moves to a tuple and returns it
 
 board_test = generate_board(8)
 prep_board_human(board_test)
 get_board_as_string(board_test)
-stone_test = [[3,6], [3,4]]
+stone_test = (3,6)
+move_test = ((3,6),(3,4))
+print(get_valid_moves_for_stone(board_test,stone_test))
+
 
 #print(get_valid_moves_for_stone(board_test, stone_test))
 
-if is_valid_move(board_test, stone_test):
+'''if is_valid_move(board_test, move_test):
     print("TRUE")
 else:
     print("FALSE")
-
+''' 
     
