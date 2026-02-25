@@ -14,6 +14,8 @@ where one of our instructors first encountered this game.
 Link to instructions: https://canvas.umn.edu/courses/541118
 """
 
+import math
+import random
 
 #These two helper functions create list types 1 and 2, which just means they
 #either start with 1 or 2 as the board switches between these as you go down
@@ -144,17 +146,31 @@ Directionality: A single turn can consist of one or more jumps using
 def is_valid_move(board, move): #move is a nested tuple ((start),(end))
     color = board[move[0][0]][move[0][1]]
     size = len(board)
-    if move[0][0] != move[1][0] and move[0][1] != move[1][1]:
-        return False
-    if color == 0:
-        return False
-    if move[0][0] <= 0 or move[1][0] <= 0 or move[0][1] > size or move[1][1] > size:
-        return False
-    if (move[0][0] + move[1][0]) % 2 != 0 or (move[0][1] + move[1][1]) % 2 != 0: #checks to make sure that the move was a jump
-        return False
+    r1,c1 = move[0][0],move[0][1]
+    r2,c2 = move[1][0],move[1][1]
     if len(move) > 2: #makes sure the input into the function was valid
         return False
-    if board[move[1][0]][move[1][1]] != 0: #checks to make sure move-to tile is empty
+    if board[r1][c1] == 0: #checks if starting square has a piece
+        return False
+    if r1 != r2 and c1 != c2: #checks if diagonal
+        return False
+    if color == 0: 
+        return False
+    if not (0 <= r1 < size and 0 <= c1 < size):
+        return False
+    if not (0 <= r2 < size and 0 <= c2 < size):
+        return False
+    if not ((abs(r1-r2) == 2 and c1==c2) or (abs(c1-c2) == 2 and r1==r2)):
+        return False
+    if (abs(r1-r2) == 2 and c1==c2):
+        mid = board[(r1+r2)//2][c1]
+        if mid == color or mid == 0:
+            return False
+    if (abs(c1-c2) == 2 and r1==r2): 
+        mid = board[r1][(c1+c2)//2] #checks to make sure that the move was a jump & has a opponent between jump squares
+        if mid == color or mid == 0:
+            return False
+    if board[r2][c2] != 0: #checks to make sure move-to tile is empty
         return False
     return True
 
@@ -168,26 +184,44 @@ def get_valid_moves_for_stone(board, stone):
     move_list = [] 
     size = len(board)
     move_list = []
+    if stone_number == 0:
+        return []
     if row1 - 2 >= 0:
         if board[row1-2][col1] == 0 and board[row1-1][col1] == opponent:
-            move_list.append((row1-2, col1))
+            move_list.append(((row1,col1),(row1-2, col1)))
     if row1 + 2 < size:
         if board[row1+2][col1] == 0 and board[row1+1][col1] == opponent:
-            move_list.append((row1+2, col1))
+            move_list.append(((row1,col1),(row1+2, col1)))
     if col1 - 2 >= 0:
         if board[row1][col1-2] == 0 and board[row1][col1-1] == opponent:
-            move_list.append((row1, col1-2))
+            move_list.append(((row1,col1),(row1, col1-2)))
     if col1 + 2 < size:
         if board[row1][col1+2] == 0 and board[row1][col1+1] == opponent:
-            move_list.append((row1, col1+2))
-    return tuple(move_list) #adds all moves to a tuple and returns it
+            move_list.append(((row1,col1),(row1, col1+2)))
+    return move_list #adds all moves to a tuple and returns it
+
+"""iterates through the entire board and checks all tiles which have the correct color,
+if they have possible moves, they are added to the move_return_list, which then is checked for zero values to
+ensure the proper return type is created."""
+def get_valid_moves(board, player): 
+    move_return_list = []
+    for index1,i in enumerate(board): 
+        for index2,j in enumerate(i):
+            if j == player:
+                moves = (get_valid_moves_for_stone(board, (index1,index2)))
+                move_return_list += moves
+    for move in move_return_list:
+        if len(move) == 0:
+            move_return_list.remove(move)
+    return move_return_list
+
 
 board_test = generate_board(8)
 prep_board_human(board_test)
 get_board_as_string(board_test)
 stone_test = (3,6)
 move_test = ((3,6),(3,4))
-print(get_valid_moves_for_stone(board_test,stone_test))
+print(get_valid_moves(board_test, 1))
 
 
 #print(get_valid_moves_for_stone(board_test, stone_test))
