@@ -160,18 +160,38 @@ def is_valid_move(board, move): #move is a nested tuple ((start),(end))
         return False
     if not (0 <= r2 < size and 0 <= c2 < size):
         return False
-    if not ((abs(r1-r2) == 2 and c1==c2) or (abs(c1-c2) == 2 and r1==r2)):
+    # must move in straight line
+    if r1 != r2 and c1 != c2:
         return False
-    if (abs(r1-r2) == 2 and c1==c2):
-        mid = board[(r1+r2)//2][c1]
-        if mid == color or mid == 0:
-            return False
-    if (abs(c1-c2) == 2 and r1==r2): 
-        mid = board[r1][(c1+c2)//2] #checks to make sure that the move was a jump & has a opponent between jump squares
-        if mid == color or mid == 0:
-            return False
-    if board[r2][c2] != 0: #checks to make sure move-to tile is empty
+    if r1 == r2:
+        distance = abs(c1 - c2)
+    else:
+        distance = abs(r1 - r2)
+    if distance < 2 or distance % 2 != 0: #must move at least 2 and be even
         return False
+    opponent = 2 if color == 1 else 1
+    if r1 == r2:  #horizontal
+        if c2 > c1:
+            step = 1
+        else:
+            step = -1
+        for c in range(c1, c2, 2 * step):
+            if board[r1][c + step] != opponent:
+                return False
+            if board[r1][c + 2 * step] != 0:
+                return False
+    else:  #vertical
+        if r2 > r1:
+            step = 1
+        else:
+            step = -1
+        for r in range(r1, r2, 2 * step):
+            if board[r + step][c1] != opponent:
+                return False
+            if board[r + 2 * step][c1] != 0:
+                return False
+        if board[r2][c2] != 0: #checks to make sure move to tile is empty
+            return False
     return True
 
 
@@ -186,18 +206,38 @@ def get_valid_moves_for_stone(board, stone):
     move_list = []
     if stone_number == 0:
         return []
-    if row1 - 2 >= 0:
-        if board[row1-2][col1] == 0 and board[row1-1][col1] == opponent:
-            move_list.append(((row1,col1),(row1-2, col1)))
-    if row1 + 2 < size:
-        if board[row1+2][col1] == 0 and board[row1+1][col1] == opponent:
-            move_list.append(((row1,col1),(row1+2, col1)))
-    if col1 - 2 >= 0:
-        if board[row1][col1-2] == 0 and board[row1][col1-1] == opponent:
-            move_list.append(((row1,col1),(row1, col1-2)))
-    if col1 + 2 < size:
-        if board[row1][col1+2] == 0 and board[row1][col1+1] == opponent:
-            move_list.append(((row1,col1),(row1, col1+2)))
+    r = row1-2 #row to move to
+    validity = True #using bools in place of break b/c not allowed
+    while r >= 0 and validity:
+        if is_valid_move(board, ((row1,col1), (r,col1))):
+            move_list.append(((row1,col1),(r, col1)))
+            r -= 2
+        else:
+            validity = False
+    r = row1+2 #row to move to
+    validity = True
+    while r < size and validity:
+        if is_valid_move(board,((row1,col1),(r, col1))):
+            move_list.append(((row1,col1),(r, col1)))
+            r += 2
+        else:
+            validity = False
+    c = col1-2 #col to move to
+    validity = True
+    while c >= 0 and validity:
+        if is_valid_move(board, ((row1,col1),(row1, c))):
+            move_list.append(((row1,col1),(row1, c)))
+            c -= 2
+        else:
+            validity = False
+    c = col1+2 #col to move to
+    validity = True
+    while c < size and validity: 
+        if is_valid_move(board, ((row1,col1),(row1, c))):
+            move_list.append(((row1,col1),(row1, c)))
+            c += 2
+        else:
+            validity = False
     return move_list #adds all moves to a tuple and returns it
 
 """iterates through the entire board and checks all tiles which have the correct color,
@@ -210,9 +250,9 @@ def get_valid_moves(board, player):
             if j == player:
                 moves = (get_valid_moves_for_stone(board, (index1,index2)))
                 move_return_list += moves
-    for move in move_return_list:
+    '''for move in move_return_list:
         if len(move) == 0:
-            move_return_list.remove(move)
+            move_return_list.remove(move)'''
     return move_return_list
 
 """
@@ -242,7 +282,7 @@ def human_player(board,player):
         else: 
             print("Valid move!")
             valid_move = True
-        return 
+        return player_tuple
 
 """
 This function takes in the board and player number and returns either an empty tuple for no moves
@@ -253,7 +293,7 @@ def random_player(board,player):
     return_tuple = ()
     if len(move_list) == 0:
         return return_tuple
-    choice = random.randint(0,len(move_list))
+    choice = random.randint(0,len(move_list)-1)
     return move_list[choice]
 """
 This function simply returns no move or the final move available in the move list (length-1)
@@ -265,13 +305,176 @@ def ai_player(board, player):
     if length == 0:
         return ai_tuple
     return move_list[length-1]
+
 """
+plays the game, switching the player back and forth every time, if there is no amount of player 1 or 2's pieces
+left on the board, the opposite player wins
 """
 def play_game(board):
-     
+     win = False
+     player = 1
+     while win == False:
+        for list in board:
+            if player not in list:
+                win = True
+            ai_player(board,player)
+            if player == 1:
+                player += 1
+            else:
+                player -= 1
+     return player
+
+"""
+         
+if __name__ == "__main__":
+
+    board = generate_board(6)
+    print(get_board_as_string(board))
+
+    board = generate_board(7)
+    print(get_board_as_string(board))
+
+    board = generate_board(8)
+    print(get_board_as_string(board))
+
+    move = ((-1, -1), (8, 8))
+    assert is_valid_move(board, move) == False
+
+    print("Running prep_board_human")
+
+    prep_board_human(board)
+    print(get_board_as_string(board))
+
+    print("########################################")
+
+    board = [[1,2,1,2],
+             [2,0,2,1],
+             [1,2,1,2],
+             [2,1,2,1],]
+
+    
+    print("Testing is_valid_move")
+
+    print(get_board_as_string(board))
+
+    assert is_valid_move(board, ((3, 1),(1, 1))) == True
+    assert is_valid_move(board, ((3, 2),(1, 1))) == False
+    assert is_valid_move(board, ((3, 3),(1, 1))) == False
+
+    board = [[1,2,1,2,1,2,1,2],
+             [2,1,0,1,2,1,2,1],
+             [1,2,1,2,1,2,1,2],
+             [2,1,0,1,2,1,2,1],
+             [1,2,1,2,1,2,1,2],
+             [2,1,0,1,2,1,2,1],
+             [1,2,1,2,1,2,1,2],
+             [2,1,2,1,2,1,2,1],]
+
+    assert is_valid_move(board, ((7, 2),(1, 2))) == True
+    assert is_valid_move(board, ((7, 2),(3, 2))) == True
+    assert is_valid_move(board, ((5, 2),(3, 2))) == False
+    assert is_valid_move(board, ((5, 3),(3, 2))) == False
+    assert is_valid_move(board, ((6, 3),(3, 2))) == False
+    assert is_valid_move(board, ((7, 3),(3, 2))) == False
+
+    print("Passed is_valid_move tests")
+
+    print("########################################")
+
+    print("Testing get_valid_moves_for_stone")
+
+    board = [[1, 2, 0, 2, 0, 0, 0, 0, 1, 2],
+             [2, 1, 2, 1, 0, 0, 2, 1, 2, 1],
+             [1, 2, 1, 2, 1, 2, 1, 2, 1, 2],
+             [2, 1, 2, 1, 2, 1, 2, 1, 2, 1],
+             [1, 2, 1, 2, 1, 2, 1, 2, 1, 2],
+             [2, 1, 0, 1, 2, 1, 2, 1, 2, 1],
+             [1, 2, 1, 2, 1, 2, 1, 2, 1, 2],
+             [2, 1, 2, 1, 2, 1, 2, 1, 2, 1],
+             [1, 2, 1, 2, 1, 2, 1, 2, 1, 2],
+             [2, 1, 2, 1, 2, 1, 2, 1, 2, 1]]
+
+    assert get_valid_moves_for_stone(board, (3,5)) == [((3, 5), (1, 5))]
+    assert get_valid_moves_for_stone(board, (5,5)) == []
+    assert get_valid_moves_for_stone(board, (7,1)) == []
+    assert get_valid_moves_for_stone(board, (7,2)) == [((7, 2), (5, 2))]
+    assert get_valid_moves_for_stone(board, (1,7)) == [((1, 7), (1, 5))]
+
+    print("Passed get_valid_moves_for_stone tests")
+
+    print("########################################")
+
+    print("Testing get_valid_moves")
+
+    assert sorted(get_valid_moves(board, 1)) == [((0, 0), (0, 2)), ((0, 0), (0, 4)),
+                                                 ((1, 7), (1, 5)), ((2, 2), (0, 2)),
+                                                ((2, 6), (0, 6)), ((3, 5), (1, 5))]
+
+    assert sorted(get_valid_moves(board, 2)) == [((0, 9), (0, 7)),
+                                                 ((1, 2), (1, 4)),
+                                                 ((2, 7), (0, 7)),
+                                                 ((3, 2), (5, 2)),
+                                                 ((3, 4), (1, 4)),
+                                                 ((5, 0), (5, 2)),
+                                                 ((5, 4), (5, 2)),
+                                                 ((7, 2), (5, 2))]
+
+    print("Passed get_valid_moves tests")
+
+    print("########################################")
+
+    print("Running random_player tests")
 
 
-board_test = generate_board(8)
+    board = [[1, 2, 0, 2, 0, 0, 0, 0, 1, 2],
+             [2, 1, 2, 1, 0, 0, 2, 1, 2, 1],
+             [1, 2, 1, 2, 1, 2, 1, 2, 1, 2],
+             [2, 1, 2, 1, 2, 1, 2, 1, 2, 1],
+             [1, 2, 1, 2, 1, 2, 1, 2, 1, 2],
+             [2, 1, 0, 1, 2, 1, 2, 1, 2, 1],
+             [1, 2, 1, 2, 1, 2, 1, 2, 1, 2],
+             [2, 1, 2, 1, 2, 1, 2, 1, 2, 1],
+             [1, 2, 1, 2, 1, 2, 1, 2, 1, 2],
+             [2, 1, 2, 1, 2, 1, 2, 1, 2, 1]]
+    for _ in range(10):
+        print("Player 1: ", random_player(board, 1))
+    for _ in range(10):
+        print("Player 2: ", random_player(board, 2))
+
+    board = [[1, 2, 0, 2, 0, 0, 0, 0, 1, 2],
+             [2, 1, 2, 1, 0, 0, 2, 1, 2, 1],
+             [1, 2, 1, 2, 1, 2, 1, 2, 1, 2],
+             [2, 1, 2, 1, 2, 1, 2, 1, 2, 1],
+             [1, 2, 1, 2, 1, 2, 1, 2, 1, 2],
+             [2, 1, 0, 1, 2, 1, 2, 1, 2, 1],
+             [1, 2, 1, 2, 1, 2, 1, 2, 1, 2],
+             [2, 1, 2, 1, 2, 1, 2, 1, 2, 1],
+             [1, 2, 1, 2, 1, 2, 1, 2, 1, 2],
+             [2, 1, 2, 1, 2, 1, 2, 1, 2, 1]]
+    
+    print("Finished running random_player")
+
+    print("########################################")
+
+    print("Running human_player tests")
+
+    human_player(board, 1)
+
+    print("Finished running human_player")
+
+    print("########################################")
+
+    print("Running play_game -- start with prepping the board")
+
+    print("ALL TESTS PASSED")
+
+    board = generate_board(10)
+    prep_board_human(board)
+
+    print(play_game(board))
+"""
+
+"""board_test = generate_board(8)
 prep_board_human(board_test)
 get_board_as_string(board_test)
 stone_test = (3,6)
@@ -283,9 +486,9 @@ move_test = ((3,6),(3,4))
 
 #print(get_valid_moves_for_stone(board_test, stone_test))
 
-'''if is_valid_move(board_test, move_test):
+if is_valid_move(board_test, move_test):
     print("TRUE")
 else:
     print("FALSE")
-''' 
+"""
     
