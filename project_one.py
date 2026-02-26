@@ -66,25 +66,23 @@ def generate_board(size):
 #This function uses the boards list values to print out the 
 # current state of the board to the terminal/screen
 def get_board_as_string(board):
-    size = len(board[0])
-    size2 = len(board)
-    if size != size2:
-        return False
+    size_row = len(board)
+    size_col = len(board[0])
     board_as_string = ""
     border_string = " "
     print(end="  ")
-    for i in range(0,size, 1): #creates the top numbering
+    for i in range(0,size_col, 1): #creates the top numbering
         if i > 9:
             print(i%10, end=" ")
         else:
             print(i, end=" ")
     print()
-    for i in range(size): #creates the top/bottom border of the cells
+    for i in range(size_col): #creates the top/bottom border of the cells
         border_string += "+-"
-        if i == size-1:
+        if i == size_col-1:
             border_string += "+"
-    for j in range(size): #creates the colored cells/blanks/pipes
-        for i in range(size):
+    for j in range(size_row): #creates the colored cells/blanks/pipes
+        for i in range(size_col):
             board_as_string += "|"
             if board[j][i] == 0:
                 board_as_string += " "
@@ -107,7 +105,8 @@ def get_board_as_string(board):
 #pieces if the moves are deemed valid
 def prep_board_human(board):
     get_board_as_string(board)
-    size = len(board[0])
+    rows = len(board)
+    cols = len(board[0])
     print("enter the two rows and two colums you wish to remove(R1 C1 R2 C2)")
     get_input = True
     while get_input == True:
@@ -119,11 +118,11 @@ def prep_board_human(board):
             print("Invalid input, need different colors.")
         elif row1_to_remove ==  0 or row2_to_remove == 0:
             print("Invalid input, need a different row1.")
-        elif row1_to_remove == size or row2_to_remove == size: #tests all cases to make sure its a valid move
+        elif row1_to_remove >= rows or row2_to_remove >= rows: #tests all cases to make sure its a valid move
             print("Invalid input, need a different row1.")
         elif col1_to_remove == 0 or col2_to_remove == 0:
             print("Invalid input, need a different column.")
-        elif col1_to_remove == size or col2_to_remove == size:
+        elif col1_to_remove >= cols or col2_to_remove >= cols:
             print("Invalid input, need a different column.")
         else:
             board[row1_to_remove][col1_to_remove] = 0 #removes elements
@@ -148,10 +147,8 @@ Directionality: A single turn can consist of one or more jumps using
 
 def is_valid_move(board, move): #move is a nested tuple ((start),(end))
     color = board[move[0][0]][move[0][1]]
-    size = len(board)
-    size2 = len(board[0])
-    if size != size2:
-        return False
+    rows = len(board)
+    cols = len(board[0])
     r1,c1 = move[0][0],move[0][1]
     r2,c2 = move[1][0],move[1][1]
     if size != size2:
@@ -164,9 +161,9 @@ def is_valid_move(board, move): #move is a nested tuple ((start),(end))
         return False
     if color == 0: 
         return False
-    if not (0 <= r1 < size and 0 <= c1 < size):
+    if not (0 <= r1 < rows and 0 <= c1 < cols):
         return False
-    if not (0 <= r2 < size and 0 <= c2 < size):
+    if not (0 <= r2 < rows and 0 <= c2 < cols):
         return False
     # must move in straight line
     if r1 != r2 and c1 != c2:
@@ -209,7 +206,8 @@ def get_valid_moves_for_stone(board, stone):
     #print(row1, col1)
     stone_number = board[row1][col1] 
     move_list = [] 
-    size = len(board)
+    rows = len(board)
+    cols = len(board[0])
     move_list = []
     if stone_number == 0:
         return []
@@ -223,7 +221,7 @@ def get_valid_moves_for_stone(board, stone):
             validity = False
     r = row1+2 #row to move to
     validity = True
-    while r < size and validity:
+    while r < rows and validity:
         if is_valid_move(board,((row1,col1),(r, col1))):
             move_list.append(((row1,col1),(r, col1)))
             r += 2
@@ -239,7 +237,7 @@ def get_valid_moves_for_stone(board, stone):
             validity = False
     c = col1+2 #col to move to
     validity = True
-    while c < size and validity: 
+    while c < cols and validity: 
         if is_valid_move(board, ((row1,col1),(row1, c))):
             move_list.append(((row1,col1),(row1, c)))
             c += 2
