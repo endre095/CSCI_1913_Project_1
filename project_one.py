@@ -215,13 +215,70 @@ def get_valid_moves(board, player):
             move_return_list.remove(move)
     return move_return_list
 
+"""
+This function gets a human input and determines if the move is valid, if so it returns the move
+otherwise it prompts the human to try a new input until it works, if there are no moves, the function 
+returns with no value
+"""
+def human_player(board,player):
+    player_tuple = ()
+    valid_move = False
+    row1,col1,row2,col2 = 0,0,0,0
+    move_list = get_valid_moves(board,player)
+    if len(move_list) == 0:
+        return player_tuple
+    else:
+        print(move_list)
+    while valid_move == False:
+        row1 = int(input("Enter the first and second value of your first move (row column): "))
+        col1 = int(input())
+        row2 = int(input("Enter the first and second value of your second move (row column): "))
+        col2 = int(input())
+        player_tuple = ((row1, col1), (row2, col2))
+        if player_tuple not in move_list:
+            player_tuple = ()
+            print("Move not possible, try again please.")
+            continue
+        else: 
+            print("Valid move!")
+            valid_move = True
+        return 
+
+"""
+This function takes in the board and player number and returns either an empty tuple for no moves
+or it returns a random move from the move list
+"""
+def random_player(board,player):
+    move_list = get_valid_moves(board,player)
+    return_tuple = ()
+    if len(move_list) == 0:
+        return return_tuple
+    choice = random.randint(0,len(move_list))
+    return move_list[choice]
+"""
+This function simply returns no move or the final move available in the move list (length-1)
+"""
+def ai_player(board, player):
+    ai_tuple = ()
+    move_list = get_valid_moves(board,player)
+    length = len(move_list)
+    if length == 0:
+        return ai_tuple
+    return move_list[length-1]
+"""
+"""
+def play_game(board):
+     
+
 
 board_test = generate_board(8)
 prep_board_human(board_test)
 get_board_as_string(board_test)
 stone_test = (3,6)
 move_test = ((3,6),(3,4))
-print(get_valid_moves(board_test, 1))
+#print(get_valid_moves(board_test, 1))
+#human_player(board_test, 1)
+#print(ai_player(board_test, 1))
 
 
 #print(get_valid_moves_for_stone(board_test, stone_test))
