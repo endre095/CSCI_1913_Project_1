@@ -17,9 +17,9 @@ Link to instructions: https://canvas.umn.edu/courses/541118
 import math
 import random
 
-#These two helper functions create list types 1 and 2, which just means they
-#either start with 1 or 2 as the board switches between these as you go down
-#the rows.
+'''These two helper functions create list types 1 and 2, which just means they
+either start with 1 or 2 as the board switches between these as you go down
+the rows.'''
 def generate_board_helper_1(int):
     list = []
     count = 1
@@ -42,9 +42,9 @@ def generate_board_helper_2(int):
         count += 1
     return list
 
-#This function creates the list of lists using the two helper functions above,
-#this function calls those two functions in accordance with the size of the list
-#as different sized nested lists would have different formats of 1's and 2's.
+'''This function creates the list of lists using the two helper functions above,
+this function calls those two functions in accordance with the size of the list
+as different sized nested lists would have different formats of 1's and 2's.'''
 def generate_board(size):
     nested_list = []
     if size % 2 == 0:
@@ -67,6 +67,9 @@ def generate_board(size):
 # current state of the board to the terminal/screen
 def get_board_as_string(board):
     size = len(board[0])
+    size2 = len(board)
+    if size != size2:
+        return False
     board_as_string = ""
     border_string = " "
     print(end="  ")
@@ -146,8 +149,13 @@ Directionality: A single turn can consist of one or more jumps using
 def is_valid_move(board, move): #move is a nested tuple ((start),(end))
     color = board[move[0][0]][move[0][1]]
     size = len(board)
+    size2 = len(board[0])
+    if size != size2:
+        return False
     r1,c1 = move[0][0],move[0][1]
     r2,c2 = move[1][0],move[1][1]
+    if size != size2:
+        return False
     if len(move) > 2: #makes sure the input into the function was valid
         return False
     if board[r1][c1] == 0: #checks if starting square has a piece
@@ -200,7 +208,6 @@ def get_valid_moves_for_stone(board, stone):
     row1, col1 = stone       #creates a copy of the stone's position with accesible data type
     #print(row1, col1)
     stone_number = board[row1][col1] 
-    opponent = 2 if stone_number == 1 else 1 #determines which color stone should be checked against for moves
     move_list = [] 
     size = len(board)
     move_list = []
