@@ -315,17 +315,40 @@ def play_game(board):
      player = 1
      while win == False:
         for list in board:
-            if player not in list:
-                win = True
-            ai_player(board,player)
+            for item in list:
+                if item == player:
+                    win = True
+            move = ai_player(board,player)
+            if len(move) == 0:
+                if player == 1:
+                    return 2
+                else:
+                    return 1
+            (r1,c1),(r2,c2) = move
+            color = board[r1][c1]
+            if r1 == r2:  #horizontal
+                if c2 > c1:
+                    step = 1
+                else:
+                    step = -1
+                for c in range(c1, c2, 2 * step):
+                    board[r1][c + step] = 0
+            if c1 == c2:  #vertical
+                if r2 > r1:
+                    step = 1
+                else:
+                    step = -1
+                for r in range(r1, r2, 2 * step):
+                    board[r + step][c1] = 0
             if player == 1:
                 player += 1
             else:
                 player -= 1
-     return player
+            board[r2][c2] = color
+            board[r1][c1] = 0
+     return 3-player
 
 """
-         
 if __name__ == "__main__":
 
     board = generate_board(6)
